@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文化祭シフト作成システム</title>
+  <style>
+    body {
+      font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      margin: 15px;
+      background-color: #f4f7f9;
+      color: #333;
+    }
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 10px;
+    }
+    .card {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 15px;
+    }
+    .form-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .form-group input, .form-group select, .form-group button {
+      padding: 6px 10px;
+      font-size: 0.9rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .btn-primary {
+      background-color: #007bff;
+      color: white;
+      border: none !important;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn-primary:hover {
+      background-color: #0056b3;
+    }
+    .btn-auto {
+      background-color: #28a745;
+      color: white;
+      border: none !important;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1rem !important;
+      padding: 8px 16px !important;
+    }
+    .btn-auto:hover {
+      background-color: #218838;
+    }
+
+    /* テーブルデザイン */
+    .table-container {
+      overflow-x: auto;
+      max-width: 100%;
+      border: 1px solid #ccc;
+      background: #fff;
+      border-radius: 4px;
+    }
+    table {
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+    th, td {
+      border: 1px solid #aaa;
+      padding: 4px 6px;
+      text-align: center;
+      min-width: 55px;
+    }
+    .sticky-col1 {
+      position: sticky;
+      left: 0;
+      background: #eee;
+      z-index: 10;
+      min-width: 80px;
+      font-weight: bold;
+    }
+    .sticky-col2 {
+      position: sticky;
+      left: 93px;
+      background: #eee;
+      z-index: 10;
+      min-width: 100px;
+    }
+
+    /* 集計行のスタイル */
+    .row-summary { background-color: #eef2f7; font-weight: bold; }
+    .row-summary td { height: 28px; }
+    .input-need {
+      width: 40px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .minus-value {
+      background-color: #ffcccc;
+      color: #cc0000;
+      font-weight: bold;
+    }
+
+    select.task-select {
+      font-size: 0.8rem;
+      padding: 2px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+    }
+    select.is-rest {
+      background-color: #e0e0e0;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>文化祭日別シフト管理システム</h1>
+
+  <!-- 操作パネル -->
+  <div class="card">
+    <div class="form-group">
+      <strong>スタッフ追加：</strong>
+      <input type="text" id="addName" placeholder="名前" style="width: 100px;">
+      <label>可能時間：</label>
+      <select id="addStart"></select>
+      〜
+      <select id="addEnd"></select>
+      <button class="btn-primary" onclick="addStaff()">追加</button>
+    </div>
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+    <div class="form-group">
+      <button class="btn-auto" onclick="autoGenerate()">⚡ 条件に合わせて自動シフト計算実行</button>
+      <small style="color: #666; margin-left: 10px;">
+        ※ 中抜け防止、最低1.5時間勤務、6時間超の1時間休憩を動的に割り当てます。
+      </small>
+    </div>
+  </div>
+
+  <!-- シフト表 -->
+  <div class="table-container">
+    <table id="shiftTable">
+      <thead>
+        <tr id="headerTime">
+          <th class="sticky-col1">名前</th>
+          <th class="sticky-col2">時間枠</th>
+        </tr>
+        <tr class="row-summary">
+          <td class="sticky-col1">必要</td>
+          <td class="sticky-col2">-</td>
+        </tr>
+        <tr class="row-summary">
+          <td class="sticky-col1">投入</td>
+          <td class="sticky-col2">-</td>
+        </tr>
+        <tr class="row-summary">
+          <td class="sticky-col1">過不足</td>
+          <td class="sticky-col2">-</td>
+        </tr>
+      </thead>
+      <tbody id="staffBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    // 30分単位の時間軸 (8:00 〜 19:30)
+    const timeSlots = [];
+    for (let h = 8; h <= 19; h++) {
+      timeSlots.push(`${h}:00`);
+      timeSlots.push(`${h}:30`);
+    }
+
+    // 必要人数デフォルト値
+    const defaultNeeds = [5, 5, 8, 8, 8, 8, 8, 8, 5, 5, 5, 5, 5, 5, 8, 8, 8, 8, 8, 8, 5, 5, 5, 5];
+
+    // 初期スタッフデータ（名前、開始枠、終了枠、シフト内容配列）
+    let staffList = [
+      { name: "中村", start: "8:30", end: "15:00", schedule: [] },
+      { name: "木村", start: "9:00", end: "16:00", schedule: [] },
+      { name: "田中", start: "9:00", end: "19:00", schedule: [] },
+      { name: "前田", start: "9:30", end: "19:00", schedule: [] },
+      { name: "初芝", start: "9:30", end: "19:00", schedule: [] },
+      { name: "井田", start: "8:30", end: "13:00", schedule: [] },
+      { name: "下原", start: "8:30", end: "13:00", schedule: [] },
+      { name: "林田", start: "15:00", end: "19:00", schedule: [] },
+      { name: "森田", start: "16:00", end: "19:00", schedule: [] },
+      { name: "新見", start: "16:00", end: "19:00", schedule: [] }
+    ];
+
+    const tasks = ["-", "準備", "受付", "在室", "休憩", "片付け"];
+
+    // ページ読み込み時の初期化
+    window.addEventListener("DOMContentLoaded", () => {
+      setupSelectOptions();
+      initTableHeader();
+      renderBody();
+      recalculate();
+    });
+
+    // ドロップダウン選択肢の生成
+    function setupSelectOptions() {
+      const sSel = document.getElementById("addStart");
+      const eSel = document.getElementById("addEnd");
+      timeSlots.forEach(t => {
+        sSel.add(new Option(t, t));
+        eSel.add(new Option(t, t));
+      });
+      sSel.value = "9:00";
+      eSel.value = "17:00";
+    }
+
+    // テーブルヘッダーおよび集計行の生成
+    function initTableHeader() {
+      const headerRow = document.getElementById("headerTime");
+      const rows = document.querySelectorAll(".row-summary");
+      const needRow = rows[0];
+      const inputRow = rows[1];
+      const diffRow = rows[2];
+
+      timeSlots.forEach((slot, index) => {
+        const th = document.createElement("th");
+        th.textContent = slot;
+        headerRow.appendChild(th);
+
+        // 必要人数入力セル
+        const tdNeed = document.createElement("td");
+        const input = document.createElement("input");
+        input.type = "number";
+        input.className = "input-need";
+        input.value = defaultNeeds[index] || 0;
+        input.addEventListener("input", recalculate);
+        tdNeed.appendChild(input);
+        needRow.appendChild(tdNeed);
+
+        // 投入人数セル
+        const tdInput = document.createElement("td");
+        tdInput.id = `input-${index}`;
+        tdInput.textContent = "0";
+        inputRow.appendChild(tdInput);
+
+        // 過不足セル
+        const tdDiff = document.createElement("td");
+        tdDiff.id = `diff-${index}`;
+        tdDiff.textContent = "0";
+        diffRow.appendChild(tdDiff);
+      });
+    }
+
+    // スタッフ一覧テーブルのレンダリング
+    function renderBody() {
+      const tbody = document.getElementById("staffBody");
+      tbody.innerHTML = "";
+
+      staffList.forEach((staff, sIndex) => {
+        const tr = document.createElement("tr");
+
+        const tdName = document.createElement("td");
+        tdName.className = "sticky-col1";
+        tdName.textContent = staff.name;
+        tr.appendChild(tdName);
+
+        const tdTime = document.createElement("td");
+        tdTime.className = "sticky-col2";
+        tdTime.textContent = `${staff.start}-${staff.end}`;
+        tr.appendChild(tdTime);
+
+        // スケジュール配列が未初期化なら「-」で埋める
+        if (!staff.schedule || staff.schedule.length !== timeSlots.length) {
+          staff.schedule = new Array(timeSlots.length).fill("-");
+        }
+
+        timeSlots.forEach((_, tIndex) => {
+          const td = document.createElement("td");
+          const select = document.createElement("select");
+          select.className = "task-select";
+          select.dataset.staffIndex = sIndex;
+          select.dataset.timeIndex = tIndex;
+
+          tasks.forEach(task => {
+            const opt = document.createElement("option");
+            opt.value = task;
+            opt.textContent = task;
+            select.appendChild(opt);
+          });
+
+          select.value = staff.schedule[tIndex];
+          if (select.value === "休憩") select.classList.add("is-rest");
+
+          select.addEventListener("change", (e) => {
+            staff.schedule[tIndex] = e.target.value;
+            if (e.target.value === "休憩") {
+              e.target.classList.add("is-rest");
+            } else {
+              e.target.classList.remove("is-rest");
+            }
+            recalculate();
+          });
+
+          td.appendChild(select);
+          tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    // スタッフ手動追加
+    function addStaff() {
+      const name = document.getElementById("addName").value.trim();
+      const start = document.getElementById("addStart").value;
+      const end = document.getElementById("addEnd").value;
+
+      if (!name) {
+        alert("名前を入力してください。");
+        return;
+      }
+      if (timeSlots.indexOf(start) >= timeSlots.indexOf(end)) {
+        alert("終了時刻は開始時刻より後に設定してください。");
+        return;
+      }
+
+      staffList.push({
+        name: name,
+        start: start,
+        end: end,
+        schedule: new Array(timeSlots.length).fill("-")
+      });
+
+      document.getElementById("addName").value = "";
+      renderBody();
+      recalculate();
+    }
+
+    // リアルタイム過不足再計算
+    function recalculate() {
+      const needInputs = document.querySelectorAll(".input-need");
+
+      timeSlots.forEach((_, tIndex) => {
+        let activeCount = 0;
+
+        staffList.forEach(staff => {
+          const task = staff.schedule[tIndex];
+          if (task && task !== "-" && task !== "休憩") {
+            activeCount++;
+          }
+        });
+
+        const inputCell = document.getElementById(`input-${tIndex}`);
+        if (inputCell) inputCell.textContent = activeCount;
+
+        const needVal = parseInt(needInputs[tIndex].value) || 0;
+        const diffVal = activeCount - needVal;
+
+        const diffCell = document.getElementById(`diff-${tIndex}`);
+        if (diffCell) {
+          diffCell.textContent = diffVal > 0 ? `+${diffVal}` : diffVal;
+          if (diffVal < 0) {
+            diffCell.className = "minus-value";
+          } else {
+            diffCell.className = "";
+          }
+        }
+      });
+    }
+
+    // 自動シフト生成アルゴリズム（JavaScript移植版）
+    function autoGenerate() {
+      const numSlots = timeSlots.length;
+      let currentCounts = new Array(numSlots).fill(0);
+
+      // スケジュール初期化
+      staffList.forEach(s => {
+        s.schedule = new Array(numSlots).fill("-");
+      });
+
+      const needInputs = document.querySelectorAll(".input-need");
+      const needs = Array.from(needInputs).map(inp => parseInt(inp.value) || 0);
+
+      // スタッフごとに割り当て計算
+      staffList.forEach(staff => {
+        const sIdx = timeSlots.indexOf(staff.start);
+        const eIdx = timeSlots.indexOf(staff.end);
+        if (sIdx === -1 || eIdx === -1 || eIdx <= sIdx) return;
+
+        const totalAvail = eIdx - sIdx;
+        const minSlots = 3; // 最低1.5時間（3コマ）
+
+        if (totalAvail < minSlots) return;
+
+        let bestStart = sIdx;
+        let bestEnd = eIdx;
+        let maxScore = -999999;
+
+        // 最適な連続勤務枠の検索（中抜けなし）
+        for (let s = sIdx; s <= eIdx - minSlots; s++) {
+          for (let e = s + minSlots; e <= eIdx; e++) {
+            let score = 0;
+            let len = e - s;
+            for (let i = s; i < e; i++) {
+              let shortage = needs[i] - currentCounts[i];
+              score += shortage * 10;
+            }
+            score -= len * 1; // 過剰な拘束への軽いペナルティ
+
+            if (score > maxScore) {
+              maxScore = score;
+              bestStart = s;
+              bestEnd = e;
+            }
+          }
+        }
+
+        // 勤務枠決定
+        let workLen = bestEnd - bestStart;
+        for (let i = bestStart; i < bestEnd; i++) {
+          staff.schedule[i] = "出勤";
+        }
+
+        // 6時間（12コマ）超の場合、2コマ（1時間）の休憩を入れる
+        if (workLen > 12) {
+          let bestBreakStart = bestStart + Math.floor(workLen / 2) - 1;
+          let minImpact = 999999;
+
+          // 休憩可能範囲の探索
+          for (let b = bestStart + 3; b <= bestEnd - 3 - 2; b++) {
+            let impact = 0;
+            for (let k = b; k < b + 2; k++) {
+              if (currentCounts[k] < needs[k]) impact += 100;
+              if (k >= timeSlots.indexOf("15:00")) impact += 10;
+            }
+            if (impact < minImpact) {
+              minImpact = impact;
+              bestBreakStart = b;
+            }
+          }
+
+          for (let b = bestBreakStart; b < bestBreakStart + 2; b++) {
+            staff.schedule[b] = "休憩";
+          }
+        }
+
+        // 投入人数の更新
+        for (let i = bestStart; i < bestEnd; i++) {
+          if (staff.schedule[i] !== "休憩") {
+            currentCounts[i]++;
+          }
+        }
+
+        // 業務名のセット
+        for (let i = bestStart; i < bestEnd; i++) {
+          if (staff.schedule[i] === "出勤") {
+            let tStr = timeSlots[i];
+            if (tStr < "9:00") staff.schedule[i] = "準備";
+            else if (tStr >= "16:30") staff.schedule[i] = "片付け";
+            else staff.schedule[i] = "在室";
+          }
+        }
+      });
+
+      // 画面更新
+      renderBody();
+      recalculate();
+    }
+  </script>
+</body>
+</html>
