@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>文化祭シフト作成システム</title>
+  <title>文化祭日別シフト管理システム</title>
   <style>
     body {
       font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
@@ -57,6 +57,36 @@
     .btn-auto:hover {
       background-color: #218838;
     }
+    .btn-delete {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 2px 6px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 0.75rem;
+    }
+
+    /* ガントチャート風の凡例（Legend） */
+    .legend-container {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+      font-size: 0.85rem;
+      align-items: center;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      border: 1px solid #999;
+    }
 
     /* テーブルデザイン */
     .table-container {
@@ -82,12 +112,12 @@
       left: 0;
       background: #eee;
       z-index: 10;
-      min-width: 80px;
+      min-width: 90px;
       font-weight: bold;
     }
     .sticky-col2 {
       position: sticky;
-      left: 93px;
+      left: 103px;
       background: #eee;
       z-index: 10;
       min-width: 100px;
@@ -107,43 +137,62 @@
       font-weight: bold;
     }
 
+    /* ガントチャート用カラーリング */
     select.task-select {
       font-size: 0.8rem;
       padding: 2px;
-      border: 1px solid #ddd;
+      border: 1px solid #ccc;
       border-radius: 3px;
+      font-weight: bold;
+      width: 100%;
+      box-sizing: border-box;
     }
-    select.is-rest {
-      background-color: #e0e0e0;
-      color: #666;
-    }
+
+    .task-準備 { background-color: #ffe0b2 !important; color: #e65100; }
+    .task-受付 { background-color: #bbdefb !important; color: #0d47a1; }
+    .task-在室 { background-color: #c8e6c9 !important; color: #1b5e20; }
+    .task-休憩 { background-color: #e0e0e0 !important; color: #616161; }
+    .task-片付け { background-color: #e1bee7 !important; color: #4a148c; }
+    .task-休 { background-color: #ffffff !important; color: #ccc; }
   </style>
 </head>
 <body>
 
-  <h1>文化祭日別シフト管理システム</h1>
+  <h1>文化祭日別シフト管理システム（ガントチャート表示）</h1>
 
   <!-- 操作パネル -->
   <div class="card">
     <div class="form-group">
-      <strong>スタッフ追加：</strong>
-      <input type="text" id="addName" placeholder="名前" style="width: 100px;">
-      <label>可能時間：</label>
+      <strong>スタッフ手動追加：</strong>
+      <input type="text" id="addName" placeholder="氏名" style="width: 100px;">
+      <label>可能時間枠：</label>
       <select id="addStart"></select>
       〜
       <select id="addEnd"></select>
       <button class="btn-primary" onclick="addStaff()">追加</button>
     </div>
+
     <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+
     <div class="form-group">
-      <button class="btn-auto" onclick="autoGenerate()">⚡ 条件に合わせて自動シフト計算実行</button>
-      <small style="color: #666; margin-left: 10px;">
-        ※ 中抜け防止、最低1.5時間勤務、6時間超の1時間休憩を動的に割り当てます。
+      <button class="btn-auto" onclick="autoGenerate()">⚡ 自動シフト作成実行</button>
+      <small style="color: #666;">
+        ※ 登録された可能時間枠・必要人数から「中抜けなし」「最低1.5h勤務」「6h超の1h休憩」を自動計算します。
       </small>
+    </div>
+
+    <!-- 凡例 (Gantt Chart Legend) -->
+    <div class="legend-container">
+      <strong>【ガントチャート凡例】</strong>
+      <div class="legend-item"><div class="legend-color task-準備"></div> 準備</div>
+      <div class="legend-item"><div class="legend-color task-受付"></div> 受付</div>
+      <div class="legend-item"><div class="legend-color task-在室"></div> 在室</div>
+      <div class="legend-item"><div class="legend-color task-休憩"></div> 休憩</div>
+      <div class="legend-item"><div class="legend-color task-片付け"></div> 片付け</div>
     </div>
   </div>
 
-  <!-- シフト表 -->
+  <!-- シフト表（ガントチャート） -->
   <div class="table-container">
     <table id="shiftTable">
       <thead>
@@ -176,26 +225,15 @@
       timeSlots.push(`${h}:30`);
     }
 
-    // 必要人数デフォルト値
+    // 必要人数のデフォルト初期設定
     const defaultNeeds = [5, 5, 8, 8, 8, 8, 8, 8, 5, 5, 5, 5, 5, 5, 8, 8, 8, 8, 8, 8, 5, 5, 5, 5];
 
-    // 初期スタッフデータ（名前、開始枠、終了枠、シフト内容配列）
-    let staffList = [
-      { name: "中村", start: "8:30", end: "15:00", schedule: [] },
-      { name: "木村", start: "9:00", end: "16:00", schedule: [] },
-      { name: "田中", start: "9:00", end: "19:00", schedule: [] },
-      { name: "前田", start: "9:30", end: "19:00", schedule: [] },
-      { name: "初芝", start: "9:30", end: "19:00", schedule: [] },
-      { name: "井田", start: "8:30", end: "13:00", schedule: [] },
-      { name: "下原", start: "8:30", end: "13:00", schedule: [] },
-      { name: "林田", start: "15:00", end: "19:00", schedule: [] },
-      { name: "森田", start: "16:00", end: "19:00", schedule: [] },
-      { name: "新見", start: "16:00", end: "19:00", schedule: [] }
-    ];
+    // ★ 初期状態はスタッフ0人からスタート
+    let staffList = [];
 
     const tasks = ["-", "準備", "受付", "在室", "休憩", "片付け"];
 
-    // ページ読み込み時の初期化
+    // ページ読み込み時
     window.addEventListener("DOMContentLoaded", () => {
       setupSelectOptions();
       initTableHeader();
@@ -203,7 +241,7 @@
       recalculate();
     });
 
-    // ドロップダウン選択肢の生成
+    // 時間選択ドロップダウンの初期化
     function setupSelectOptions() {
       const sSel = document.getElementById("addStart");
       const eSel = document.getElementById("addEnd");
@@ -215,7 +253,7 @@
       eSel.value = "17:00";
     }
 
-    // テーブルヘッダーおよび集計行の生成
+    // テーブルヘッダーと集計行の動的生成
     function initTableHeader() {
       const headerRow = document.getElementById("headerTime");
       const rows = document.querySelectorAll(".row-summary");
@@ -228,7 +266,7 @@
         th.textContent = slot;
         headerRow.appendChild(th);
 
-        // 必要人数入力セル
+        // 必要人数入力欄
         const tdNeed = document.createElement("td");
         const input = document.createElement("input");
         input.type = "number";
@@ -238,13 +276,13 @@
         tdNeed.appendChild(input);
         needRow.appendChild(tdNeed);
 
-        // 投入人数セル
+        // 投入人数
         const tdInput = document.createElement("td");
         tdInput.id = `input-${index}`;
         tdInput.textContent = "0";
         inputRow.appendChild(tdInput);
 
-        // 過不足セル
+        // 過不足
         const tdDiff = document.createElement("td");
         tdDiff.id = `diff-${index}`;
         tdDiff.textContent = "0";
@@ -252,29 +290,43 @@
       });
     }
 
-    // スタッフ一覧テーブルのレンダリング
+    // スタッフ行の描画（ガントチャート形式）
     function renderBody() {
       const tbody = document.getElementById("staffBody");
       tbody.innerHTML = "";
 
+      if (staffList.length === 0) {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = timeSlots.length + 2;
+        td.style.padding = "20px";
+        td.style.color = "#888";
+        td.textContent = "※ 上のフォームからスタッフ名と勤務可能時間を入力して追加してください。";
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+
       staffList.forEach((staff, sIndex) => {
         const tr = document.createElement("tr");
 
+        // 名前列（削除ボタン付き）
         const tdName = document.createElement("td");
         tdName.className = "sticky-col1";
-        tdName.textContent = staff.name;
+        tdName.innerHTML = `${staff.name} <button class="btn-delete" onclick="removeStaff(${sIndex})">×</button>`;
         tr.appendChild(tdName);
 
+        // 時間枠列
         const tdTime = document.createElement("td");
         tdTime.className = "sticky-col2";
         tdTime.textContent = `${staff.start}-${staff.end}`;
         tr.appendChild(tdTime);
 
-        // スケジュール配列が未初期化なら「-」で埋める
         if (!staff.schedule || staff.schedule.length !== timeSlots.length) {
           staff.schedule = new Array(timeSlots.length).fill("-");
         }
 
+        // コマ列（ガントチャートバー）
         timeSlots.forEach((_, tIndex) => {
           const td = document.createElement("td");
           const select = document.createElement("select");
@@ -290,15 +342,14 @@
           });
 
           select.value = staff.schedule[tIndex];
-          if (select.value === "休憩") select.classList.add("is-rest");
+          
+          // ガントチャート用色付けクラス適用
+          applyTaskColor(select, select.value);
 
           select.addEventListener("change", (e) => {
-            staff.schedule[tIndex] = e.target.value;
-            if (e.target.value === "休憩") {
-              e.target.classList.add("is-rest");
-            } else {
-              e.target.classList.remove("is-rest");
-            }
+            const val = e.target.value;
+            staff.schedule[tIndex] = val;
+            applyTaskColor(e.target, val);
             recalculate();
           });
 
@@ -310,14 +361,25 @@
       });
     }
 
-    // スタッフ手動追加
+    // タスクに応じた背景色設定（ガントチャートバー化）
+    function applyTaskColor(element, taskName) {
+      element.className = "task-select";
+      if (taskName && taskName !== "-") {
+        element.classList.add(`task-${taskName}`);
+      } else {
+        element.classList.add("task-休");
+      }
+    }
+
+    // スタッフの追加
     function addStaff() {
-      const name = document.getElementById("addName").value.trim();
+      const nameInput = document.getElementById("addName");
+      const name = nameInput.value.trim();
       const start = document.getElementById("addStart").value;
       const end = document.getElementById("addEnd").value;
 
       if (!name) {
-        alert("名前を入力してください。");
+        alert("スタッフの名前を入力してください。");
         return;
       }
       if (timeSlots.indexOf(start) >= timeSlots.indexOf(end)) {
@@ -332,12 +394,19 @@
         schedule: new Array(timeSlots.length).fill("-")
       });
 
-      document.getElementById("addName").value = "";
+      nameInput.value = "";
       renderBody();
       recalculate();
     }
 
-    // リアルタイム過不足再計算
+    // スタッフの削除
+    function removeStaff(index) {
+      staffList.splice(index, 1);
+      renderBody();
+      recalculate();
+    }
+
+    // リアルタイム集計（投入人数・過不足）
     function recalculate() {
       const needInputs = document.querySelectorAll(".input-need");
 
@@ -369,12 +438,17 @@
       });
     }
 
-    // 自動シフト生成アルゴリズム（JavaScript移植版）
+    // 自動シフト計算ロジック
     function autoGenerate() {
+      if (staffList.length === 0) {
+        alert("スタッフが登録されていません。先にスタッフを追加してください。");
+        return;
+      }
+
       const numSlots = timeSlots.length;
       let currentCounts = new Array(numSlots).fill(0);
 
-      // スケジュール初期化
+      // 初期化
       staffList.forEach(s => {
         s.schedule = new Array(numSlots).fill("-");
       });
@@ -382,7 +456,7 @@
       const needInputs = document.querySelectorAll(".input-need");
       const needs = Array.from(needInputs).map(inp => parseInt(inp.value) || 0);
 
-      // スタッフごとに割り当て計算
+      // 自動配置処理
       staffList.forEach(staff => {
         const sIdx = timeSlots.indexOf(staff.start);
         const eIdx = timeSlots.indexOf(staff.end);
@@ -397,7 +471,7 @@
         let bestEnd = eIdx;
         let maxScore = -999999;
 
-        // 最適な連続勤務枠の検索（中抜けなし）
+        // 最適連続枠の算出（中抜けなし）
         for (let s = sIdx; s <= eIdx - minSlots; s++) {
           for (let e = s + minSlots; e <= eIdx; e++) {
             let score = 0;
@@ -406,7 +480,7 @@
               let shortage = needs[i] - currentCounts[i];
               score += shortage * 10;
             }
-            score -= len * 1; // 過剰な拘束への軽いペナルティ
+            score -= len * 1;
 
             if (score > maxScore) {
               maxScore = score;
@@ -416,18 +490,17 @@
           }
         }
 
-        // 勤務枠決定
+        // 勤務枠適用
         let workLen = bestEnd - bestStart;
         for (let i = bestStart; i < bestEnd; i++) {
           staff.schedule[i] = "出勤";
         }
 
-        // 6時間（12コマ）超の場合、2コマ（1時間）の休憩を入れる
+        // 6時間（12コマ）超の場合、1時間（2コマ）休憩挿入
         if (workLen > 12) {
           let bestBreakStart = bestStart + Math.floor(workLen / 2) - 1;
           let minImpact = 999999;
 
-          // 休憩可能範囲の探索
           for (let b = bestStart + 3; b <= bestEnd - 3 - 2; b++) {
             let impact = 0;
             for (let k = b; k < b + 2; k++) {
@@ -445,14 +518,14 @@
           }
         }
 
-        // 投入人数の更新
+        // 投入人数カウント更新
         for (let i = bestStart; i < bestEnd; i++) {
           if (staff.schedule[i] !== "休憩") {
             currentCounts[i]++;
           }
         }
 
-        // 業務名のセット
+        // 業務割り当て
         for (let i = bestStart; i < bestEnd; i++) {
           if (staff.schedule[i] === "出勤") {
             let tStr = timeSlots[i];
@@ -463,7 +536,6 @@
         }
       });
 
-      // 画面更新
       renderBody();
       recalculate();
     }
