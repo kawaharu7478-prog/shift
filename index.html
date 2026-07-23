@@ -14,6 +14,9 @@
     h1 {
       font-size: 1.4rem;
       margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
     .card {
       background: #fff;
@@ -35,6 +38,18 @@
       border: 1px solid #ccc;
       border-radius: 4px;
     }
+    .date-picker-group {
+      background-color: #eef2f7;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #d0d7de;
+    }
+    .date-picker-group input[type="date"] {
+      font-weight: bold;
+      font-size: 1rem;
+      color: #0056b3;
+    }
+
     .btn-primary {
       background-color: #007bff;
       color: white;
@@ -174,11 +189,21 @@
 </head>
 <body>
 
-  <h1>文化祭日別シフト管理システム</h1>
+  <h1>
+    文化祭日別シフト管理システム
+    <span id="displayDateTitle" style="font-size: 1.1rem; color: #0056b3;"></span>
+  </h1>
 
   <!-- 操作パネル -->
   <div class="card">
-    <div class="form-group">
+    <!-- 日付選択パネル -->
+    <div class="form-group date-picker-group">
+      <strong>📅 シフト日付：</strong>
+      <input type="date" id="shiftDate" onchange="changeDate()">
+      <small style="color: #555; margin-left: 5px;">※ 日付を変更すると、その日のシフトに切り替わります。</small>
+    </div>
+
+    <div class="form-group" style="margin-top: 15px;">
       <strong>スタッフ手動追加：</strong>
       <input type="text" id="addName" placeholder="氏名" style="width: 100px;">
       <label>可能時間枠：</label>
@@ -192,7 +217,7 @@
 
     <div class="form-group">
       <button class="btn-auto" onclick="autoGenerate()">⚡ 自動シフト作成実行</button>
-      <button class="btn-clear" onclick="clearData()">🗑️ 保存データをリセット</button>
+      <button class="btn-clear" onclick="clearData()">🗑️ この日のデータをリセット</button>
       <span class="save-status" id="saveMsg">✓ 自動保存済み</span>
     </div>
 
@@ -264,18 +289,26 @@
 
     // デフォルトの業務別必要人数
     const defaultTaskNeeds = {
-      "準備":   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      "受付":   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      "在室":   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      "片付け": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      "準備":   [5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      "受付":   [0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0],
+      "在室":   [0, 0, 6, 6, 6, 6, 6, 6, 3, 3, 3, 3, 3, 3, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0],
+      "片付け": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5]
     };
 
     let staffList = [];
+    let currentDate = "";
 
     window.addEventListener("DOMContentLoaded", () => {
       setupSelectOptions();
       initTableHeader();
-      loadData(); // 保存データの読み込み
+      
+      // 今日の日付を初期値としてセット
+      const today = new Date().toISOString().split('T')[0];
+      const dateInput = document.getElementById("shiftDate");
+      dateInput.value = today;
+      currentDate = today;
+
+      loadDataForDate(currentDate);
       renderBody();
       recalculate();
     });
@@ -302,7 +335,6 @@
         th.textContent = slot;
         headerRow.appendChild(th);
 
-        // 業務別の必要人数入力セル
         taskRows.forEach(row => {
           const taskName = row.dataset.task;
           const td = document.createElement("td");
@@ -317,7 +349,6 @@
           row.appendChild(td);
         });
 
-        // 集計行
         summaryRows.forEach((row, rIdx) => {
           const td = document.createElement("td");
           td.id = `summary-r${rIdx}-${index}`;
@@ -325,6 +356,23 @@
           row.appendChild(td);
         });
       });
+    }
+
+    // 日付切り替え時の処理
+    function changeDate() {
+      // 変更前の日付データを保存
+      if (currentDate) {
+        saveDataForDate(currentDate);
+      }
+
+      // 新しい日付を取得してデータ読み込み
+      const newDate = document.getElementById("shiftDate").value;
+      if (!newDate) return;
+
+      currentDate = newDate;
+      loadDataForDate(currentDate);
+      renderBody();
+      recalculate();
     }
 
     // 実際のシフト時間計算
@@ -358,7 +406,7 @@
         td.colSpan = timeSlots.length + 2;
         td.style.padding = "20px";
         td.style.color = "#888";
-        td.textContent = "※ 上のフォームからスタッフ名と勤務可能時間を入力して追加してください。";
+        td.textContent = `※ ${currentDate} のスタッフはまだ登録されていません。上のフォームから追加してください。`;
         tr.appendChild(td);
         tbody.appendChild(tr);
         return;
@@ -459,12 +507,14 @@
       recalculate();
     }
 
-    // --- データ保存・読み込み・削除処理 ---
-    function saveData() {
-      // 1. スタッフリストの保存
-      localStorage.setItem("shift_staffList", JSON.stringify(staffList));
+    // --- 日付別の保存・読み込み処理 ---
+    function saveDataForDate(dateStr) {
+      if (!dateStr) return;
 
-      // 2. 必要人数の保存
+      // 1. スタッフリストの保存（日付キー付き）
+      localStorage.setItem(`shift_${dateStr}_staffList`, JSON.stringify(staffList));
+
+      // 2. 必要人数の保存（日付キー付き）
       const taskNeedsData = {};
       taskTypes.forEach(task => {
         taskNeedsData[task] = [];
@@ -473,9 +523,8 @@
           taskNeedsData[task].push(inp ? (parseInt(inp.value) || 0) : 0);
         });
       });
-      localStorage.setItem("shift_taskNeeds", JSON.stringify(taskNeedsData));
+      localStorage.setItem(`shift_${dateStr}_taskNeeds`, JSON.stringify(taskNeedsData));
 
-      // 保存ステータス表示
       const msg = document.getElementById("saveMsg");
       if (msg) {
         msg.textContent = "✓ 保存されました";
@@ -483,43 +532,50 @@
       }
     }
 
-    function loadData() {
-      const savedStaff = localStorage.getItem("shift_staffList");
+    function loadDataForDate(dateStr) {
+      document.getElementById("displayDateTitle").textContent = `（${dateStr}）`;
+
+      // スタッフデータの読み込み
+      const savedStaff = localStorage.getItem(`shift_${dateStr}_staffList`);
       if (savedStaff) {
         try {
           staffList = JSON.parse(savedStaff);
         } catch (e) {
-          console.error("保存データの読み込みエラー:", e);
+          staffList = [];
         }
+      } else {
+        staffList = [];
       }
 
-      const savedNeeds = localStorage.getItem("shift_taskNeeds");
+      // 必要人数の読み込み
+      const savedNeeds = localStorage.getItem(`shift_${dateStr}_taskNeeds`);
+      let needsObj = null;
       if (savedNeeds) {
         try {
-          const needsObj = JSON.parse(savedNeeds);
-          taskTypes.forEach(task => {
-            if (needsObj[task]) {
-              timeSlots.forEach((_, tIndex) => {
-                const inp = document.querySelector(`.input-need-${task}[data-time-index='${tIndex}']`);
-                if (inp && needsObj[task][tIndex] !== undefined) {
-                  inp.value = needsObj[task][tIndex];
-                }
-              });
-            }
-          });
-        } catch (e) {
-          console.error("必要人数の読み込みエラー:", e);
-        }
+          needsObj = JSON.parse(savedNeeds);
+        } catch (e) {}
       }
+
+      taskTypes.forEach(task => {
+        timeSlots.forEach((_, tIndex) => {
+          const inp = document.querySelector(`.input-need-${task}[data-time-index='${tIndex}']`);
+          if (inp) {
+            if (needsObj && needsObj[task] && needsObj[task][tIndex] !== undefined) {
+              inp.value = needsObj[task][tIndex];
+            } else {
+              inp.value = (defaultTaskNeeds[task] && defaultTaskNeeds[task][tIndex]) || 0;
+            }
+          }
+        });
+      });
     }
 
     function clearData() {
-      if (confirm("保存されているシフトデータとスタッフ情報をすべてリセットしますか？")) {
-        localStorage.removeItem("shift_staffList");
-        localStorage.removeItem("shift_taskNeeds");
+      if (confirm(`【${currentDate}】の保存データとスタッフ情報をリセットしますか？`)) {
+        localStorage.removeItem(`shift_${currentDate}_staffList`);
+        localStorage.removeItem(`shift_${currentDate}_taskNeeds`);
         staffList = [];
         
-        // デフォルト値に戻す
         taskTypes.forEach(task => {
           timeSlots.forEach((_, tIndex) => {
             const inp = document.querySelector(`.input-need-${task}[data-time-index='${tIndex}']`);
@@ -529,7 +585,7 @@
 
         renderBody();
         recalculate();
-        alert("データを消去してリセットしたぞね！");
+        alert(`${currentDate} のデータをリセットしたぞね！`);
       }
     }
 
@@ -569,8 +625,10 @@
         }
       });
 
-      // 変化があるたびに自動保存実行
-      saveData();
+      // 現在選択中の日付に対して保存実行
+      if (currentDate) {
+        saveDataForDate(currentDate);
+      }
     }
 
     // 自動シフト計算実行
