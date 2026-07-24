@@ -748,7 +748,7 @@
     }
 
     /* ==========================================================
-       ★ 完成版ガントチャート (完成版はセル背景の黄色を排除・白色固定)
+       ★ 完成版ガントチャート (凡例・対象人数削除版)
        ========================================================== */
     function exportShift() {
       if (staffList.length === 0) { alert("出力するスタッフデータがありません。"); return; }
@@ -774,7 +774,7 @@
         return blocks;
       }
 
-      // 1. スタッフ行の生成（★完成版ではセル背景の黄色クラス付与を行わずcell-emptyに固定）
+      // 1. スタッフ行の生成
       let staffRowsHtml = "";
       staffList.forEach(staff => {
         const timeStr = getActualWorkTime(staff.schedule);
@@ -851,15 +851,6 @@
       let timeHeaderHtml = "";
       timeSlots.forEach(t => { timeHeaderHtml += `<th class="time-col">${t}</th>`; });
 
-      // ★ 完成版の凡例（希望枠の黄色凡例を削除）
-      let legendHtml = "<strong>【凡例】</strong>";
-      taskList.forEach((task, idx) => {
-        if (task.name) {
-          legendHtml += `<div class="legend-item"><div class="legend-color color-bg-${idx % 8}"></div> ${task.name}</div>`;
-        }
-      });
-      legendHtml += `<div class="legend-item"><div class="legend-color task-休憩"></div> 休憩</div>`;
-
       const nowStr = new Date().toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 
       const html = `
@@ -872,19 +863,15 @@
     @page { size: A4 landscape; margin: 6mm 8mm; }
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box; }
     body { font-family: "Hiragino Kaku Gothic ProN", "Meiryo", Arial, sans-serif; margin: 0; padding: 10px; color: #111; background-color: #fff; }
-    .no-print-bar { display: flex; justify-content: space-between; align-items: center; background: #eef2f7; padding: 10px 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #d0d7de; }
+    .no-print-bar { display: flex; justify-content: space-between; align-items: center; background: #eef2f7; padding: 10px 15px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #d0d7de; }
     .btn-print { background-color: #007bff; color: white; border: none; padding: 8px 20px; font-size: 0.95rem; border-radius: 4px; font-weight: bold; cursor: pointer; }
     .btn-print:hover { background-color: #0056b3; }
 
     .header-container { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px double #0056b3; padding-bottom: 4px; margin-bottom: 10px; }
     .header-title-area { display: flex; align-items: baseline; gap: 15px; }
-    .header-title-area h1 { margin: 0; font-size: 1.6rem; letter-spacing: 1px; }
-    .header-title-area .date { font-size: 1.2rem; font-weight: bold; color: #0056b3; }
+    .header-title-area h1 { margin: 0; font-size: 1.5rem; letter-spacing: 1px; }
+    .header-title-area .date { font-size: 1.1rem; font-weight: bold; color: #0056b3; }
     .header-meta { font-size: 0.75rem; color: #555; text-align: right; }
-
-    .legend-container { display: flex; gap: 15px; margin-bottom: 10px; font-size: 0.8rem; align-items: center; background: #fafafa; padding: 6px 10px; border: 1px solid #eee; border-radius: 4px; }
-    .legend-item { display: flex; align-items: center; gap: 5px; }
-    .legend-color { width: 14px; height: 14px; border-radius: 2px; border: 1px solid #888; }
 
     /* テーブル基本スタイル (通常の行高: 30px) */
     table.gantt-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 0.75rem; }
@@ -957,13 +944,8 @@
       <div class="date">📅 対象日: ${currentDate}</div>
     </div>
     <div class="header-meta">
-      出力日時: ${nowStr}<br>
-      対象人数: ${staffList.length}名
+      出力日時: ${nowStr}
     </div>
-  </div>
-
-  <div class="legend-container">
-    ${legendHtml}
   </div>
 
   <table class="gantt-table">
