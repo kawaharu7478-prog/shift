@@ -11,95 +11,55 @@
       background-color: #f4f7f9;
       color: #333;
     }
-    h1 {
-      font-size: 1.4rem;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .card {
-      background: #fff;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      margin-bottom: 15px;
-    }
-    .form-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-    .form-group input, .form-group select, .form-group button {
-      padding: 6px 10px;
-      font-size: 0.9rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    .date-picker-group {
-      background-color: #eef2f7;
-      padding: 8px 12px;
-      border-radius: 6px;
-      border: 1px solid #d0d7de;
-    }
-    .date-picker-group input[type="date"] {
-      font-weight: bold;
-      font-size: 1rem;
-      color: #0056b3;
-    }
+    h1 { font-size: 1.4rem; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+    .card { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 15px; }
+    .form-group { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
+    .form-group input, .form-group select, .form-group button { padding: 6px 10px; font-size: 0.9rem; border: 1px solid #ccc; border-radius: 4px; }
+    
+    .date-picker-group { background-color: #eef2f7; padding: 8px 12px; border-radius: 6px; border: 1px solid #d0d7de; }
+    .date-picker-group input[type="date"] { font-weight: bold; font-size: 1rem; color: #0056b3; }
 
-    /* ボタン learned styling */
     .btn-primary { background-color: #007bff; color: white; border: none !important; cursor: pointer; font-weight: bold; }
     .btn-primary:hover { background-color: #0056b3; }
-    
     .btn-sort { background-color: #6f42c1; color: white; border: none !important; cursor: pointer; font-weight: bold; }
     .btn-sort:hover { background-color: #593196; }
-
     .btn-auto { background-color: #28a745; color: white; border: none !important; cursor: pointer; font-weight: bold; font-size: 1rem !important; padding: 8px 16px !important; }
     .btn-auto:hover { background-color: #218838; }
-
     .btn-output { background-color: #17a2b8; color: white; border: none !important; cursor: pointer; font-weight: bold; font-size: 1rem !important; padding: 8px 16px !important; }
     .btn-output:hover { background-color: #138496; }
-
     .btn-clear { background-color: #6c757d; color: white; border: none !important; cursor: pointer; font-weight: bold; padding: 8px 14px !important; }
     .btn-clear:hover { background-color: #5a6268; }
-
     .btn-small-ctrl { background-color: #e2e8f0; border: 1px solid #cbd5e1 !important; cursor: pointer; font-size: 0.8rem; padding: 3px 8px !important; }
     .btn-small-ctrl:hover { background-color: #cbd5e1; }
-
     .btn-delete { background-color: #dc3545; color: white; border: none; padding: 2px 6px; border-radius: 3px; cursor: pointer; font-size: 0.75rem; }
     .btn-delete:hover { background-color: #bd2130; }
-
     .btn-add-task { background-color: #e9ecef; border: 1px dashed #6c757d !important; color: #495057; font-weight: bold; cursor: pointer; padding: 4px 12px; margin-top: 5px; width: 100%; }
     .btn-add-task:hover { background-color: #dee2e6; }
 
     .save-status { font-size: 0.8rem; color: #28a745; font-weight: bold; margin-left: auto; }
 
-    /* ガントチャート凡例 */
     .legend-container { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px; font-size: 0.85rem; align-items: center; }
     .legend-item { display: flex; align-items: center; gap: 5px; }
     .legend-color { width: 16px; height: 16px; border-radius: 3px; border: 1px solid #999; }
 
-    /* テーブルデザイン */
     .table-container { overflow-x: auto; max-width: 100%; border: 1px solid #ccc; background: #fff; border-radius: 4px; }
     table { border-collapse: collapse; font-size: 0.85rem; white-space: nowrap; }
     th, td { border: 1px solid #aaa; padding: 4px 6px; text-align: center; min-width: 55px; }
     .sticky-col1 { position: sticky; left: 0; background: #eee; z-index: 10; min-width: 130px; font-weight: bold; }
     .sticky-col2 { position: sticky; left: 143px; background: #eee; z-index: 10; min-width: 105px; font-weight: bold; color: #0056b3; }
 
-    /* 業務名入力インプット */
     .input-task-name { width: 80px; padding: 2px 4px; font-size: 0.8rem; font-weight: bold; border: 1px solid #aaa; border-radius: 3px; text-align: center; }
-
-    /* 集計行スタイル */
     .row-need-task { background-color: #fdfffe; font-size: 0.8rem; }
     .row-summary-total { background-color: #eef2f7; font-weight: bold; }
     .input-need { width: 38px; text-align: center; font-size: 0.8rem; }
     .minus-value { background-color: #ffcccc; color: #cc0000; font-weight: bold; }
 
-    /* パレットカラー */
     select.task-select { font-size: 0.8rem; padding: 2px; border: 1px solid #ccc; border-radius: 3px; font-weight: bold; width: 100%; box-sizing: border-box; }
+    
+    /* ★ シフト希望枠（未割り当て時の黄色ハイライト） */
+    .slot-available { background-color: #fffde7 !important; color: #f57f17; border: 1px dashed #fbc02d !important; }
+    
+    /* タスクカラー定義 */
     .color-bg-0 { background-color: #ffe0b2 !important; color: #e65100; }
     .color-bg-1 { background-color: #bbdefb !important; color: #0d47a1; }
     .color-bg-2 { background-color: #c8e6c9 !important; color: #1b5e20; }
@@ -119,13 +79,11 @@
     <span id="displayDateTitle" style="font-size: 1.1rem; color: #0056b3;"></span>
   </h1>
 
-  <!-- 操作パネル -->
   <div class="card">
     <div class="form-group date-picker-group">
       <strong>📅 シフト日付：</strong>
       <input type="date" id="shiftDate" onchange="changeDate()">
       
-      <!-- 時間軸コントロール -->
       <span style="margin-left: 15px; font-weight: bold;">⏰ 時間帯の調整：</span>
       <button class="btn-small-ctrl" onclick="extendTimeFrame('start', -30)">← 早朝に30分追加</button>
       <button class="btn-small-ctrl" onclick="extendTimeFrame('start', 30)">先頭30分削る</button>
@@ -153,13 +111,11 @@
       <span class="save-status" id="saveMsg">✓ 自動保存済み</span>
     </div>
 
-    <!-- 凡例 -->
     <div class="legend-container" id="legendContainer">
       <strong>【凡例】</strong>
     </div>
   </div>
 
-  <!-- シフト表 -->
   <div class="table-container">
     <table id="shiftTable">
       <thead id="tableHead"></thead>
@@ -168,7 +124,6 @@
   </div>
 
   <script>
-    // デフォルトの時間軸 (8:00 〜 19:30)
     let timeSlots = [];
     function initDefaultTimeSlots() {
       timeSlots = [];
@@ -178,7 +133,6 @@
       }
     }
 
-    // 業務リスト: [{ name: "", needs: [] }]
     let taskList = [
       { name: "", needs: [] },
       { name: "", needs: [] },
@@ -200,7 +154,6 @@
       renderAll();
     });
 
-    // 時刻文字列の加減算ユーティリティ (例: "8:00" + 30分 = "8:30")
     function addMinutesToTimeStr(timeStr, mins) {
       let [h, m] = timeStr.split(':').map(Number);
       let total = h * 60 + m + mins;
@@ -211,27 +164,26 @@
       return `${newH}:${newM === 0 ? '00' : newM}`;
     }
 
-    // 時間枠の前後拡張・削減
     function extendTimeFrame(position, mins) {
       if (position === 'start') {
-        if (mins < 0) { // 先頭に30分追加
+        if (mins < 0) {
           const newStart = addMinutesToTimeStr(timeSlots[0], -30);
           timeSlots.unshift(newStart);
           staffList.forEach(s => s.schedule.unshift("-"));
           taskList.forEach(t => t.needs.unshift(""));
-        } else { // 先頭の30分を削除
+        } else {
           if (timeSlots.length <= 2) { alert("これ以上縮小できません。"); return; }
           timeSlots.shift();
           staffList.forEach(s => s.schedule.shift());
           taskList.forEach(t => t.needs.shift());
         }
       } else if (position === 'end') {
-        if (mins > 0) { // 末尾に30分追加
+        if (mins > 0) {
           const newEnd = addMinutesToTimeStr(timeSlots[timeSlots.length - 1], 30);
           timeSlots.push(newEnd);
           staffList.forEach(s => s.schedule.push("-"));
           taskList.forEach(t => t.needs.push(""));
-        } else { // 末尾の30分を削除
+        } else {
           if (timeSlots.length <= 2) { alert("これ以上縮小できません。"); return; }
           timeSlots.pop();
           staffList.forEach(s => s.schedule.pop());
@@ -261,7 +213,6 @@
       eSel.value = timeSlots.includes(oldE) ? oldE : timeSlots[timeSlots.length - 1];
     }
 
-    // テーブル全体の描画
     function renderAll() {
       setupSelectOptions();
       renderHeader();
@@ -274,7 +225,6 @@
       const thead = document.getElementById("tableHead");
       thead.innerHTML = "";
 
-      // 1行目: 時間軸ヘッダー
       const trHeader = document.createElement("tr");
       trHeader.innerHTML = `<th class="sticky-col1">名前</th><th class="sticky-col2">シフト時間</th>`;
       timeSlots.forEach(slot => {
@@ -284,7 +234,6 @@
       });
       thead.appendChild(trHeader);
 
-      // 業務別必要人数入力行
       taskList.forEach((task, tIdx) => {
         const trTask = document.createElement("tr");
         trTask.className = "row-need-task";
@@ -320,7 +269,6 @@
         thead.appendChild(trTask);
       });
 
-      // 業務追加ボタン行
       const trAddTask = document.createElement("tr");
       const tdAddTask = document.createElement("td");
       tdAddTask.colSpan = timeSlots.length + 2;
@@ -330,7 +278,6 @@
       trAddTask.appendChild(tdAddTask);
       thead.appendChild(trAddTask);
 
-      // 合計集計行
       const summaryTitles = ["必要合計", "投入合計", "過不足"];
       summaryTitles.forEach((stTitle, rIdx) => {
         const trSum = document.createElement("tr");
@@ -338,7 +285,9 @@
         trSum.innerHTML = `<td class="sticky-col1">${stTitle}</td><td class="sticky-col2">-</td>`;
         timeSlots.forEach((_, timeIdx) => {
           const td = document.createElement("td");
-          td.id = `summary-r${rIdx}-${timeIdx}`;
+          td.id = `summary-r0-${timeIdx}`;
+          if (rIdx === 1) td.id = `summary-r1-${timeIdx}`;
+          if (rIdx === 2) td.id = `summary-r2-${timeIdx}`;
           td.textContent = "0";
           trSum.appendChild(td);
         });
@@ -371,10 +320,14 @@
       const container = document.getElementById("legendContainer");
       container.innerHTML = "<strong>【凡例】</strong>";
 
-      let hasTask = false;
+      // 編集画面用の「希望時間枠」凡例を追加
+      const availLegend = document.createElement("div");
+      availLegend.className = "legend-item";
+      availLegend.innerHTML = `<div class="legend-color slot-available"></div> シフト希望枠（未割り当て）`;
+      container.appendChild(availLegend);
+
       taskList.forEach((task, idx) => {
         if (task.name) {
-          hasTask = true;
           const colorClass = `color-bg-${idx % 8}`;
           const item = document.createElement("div");
           item.className = "legend-item";
@@ -382,13 +335,6 @@
           container.appendChild(item);
         }
       });
-
-      if (!hasTask) {
-        const span = document.createElement("span");
-        span.style.color = "#888";
-        span.textContent = "（業務名を入力すると凡例が表示されます）";
-        container.appendChild(span);
-      }
     }
 
     function changeDate() {
@@ -417,6 +363,14 @@
       const startTime = timeSlots[firstIdx];
       const endTime = (lastIdx + 1 < timeSlots.length) ? timeSlots[lastIdx + 1] : addMinutesToTimeStr(timeSlots[timeSlots.length - 1], 30);
       return `${startTime}-${endTime}`;
+    }
+
+    // ★ シフト希望範囲内かどうか判定する関数
+    function isWithinAvailableTime(staff, timeIdx) {
+      const sIdx = timeSlots.indexOf(staff.availStart);
+      const eIdx = timeSlots.indexOf(staff.availEnd);
+      if (sIdx === -1 || eIdx === -1) return false;
+      return timeIdx >= sIdx && timeIdx < eIdx;
     }
 
     function renderBody() {
@@ -459,12 +413,12 @@
           select.dataset.staffIndex = sIndex;
           select.dataset.timeIndex = tIndex;
 
-          buildSelectOptions(select, staff.schedule[tIndex]);
+          buildSelectOptions(select, staff.schedule[tIndex], staff, tIndex);
 
           select.addEventListener("change", (e) => {
             const val = e.target.value;
             staff.schedule[tIndex] = val;
-            applyTaskColor(e.target, val);
+            applyTaskColor(e.target, val, staff, tIndex);
             
             document.getElementById(`staff-time-${sIndex}`).textContent = getActualWorkTime(staff.schedule);
             recalculate();
@@ -478,7 +432,7 @@
       });
     }
 
-    function buildSelectOptions(select, currentValue) {
+    function buildSelectOptions(select, currentValue, staff, tIndex) {
       select.innerHTML = "";
       select.appendChild(new Option("-", "-"));
 
@@ -490,18 +444,22 @@
 
       select.appendChild(new Option("休憩", "休憩"));
       select.value = currentValue || "-";
-      applyTaskColor(select, select.value);
+      applyTaskColor(select, select.value, staff, tIndex);
     }
 
     function updateAllStaffSelectOptions() {
       const selects = document.querySelectorAll("select.task-select");
       selects.forEach(select => {
+        const sIndex = parseInt(select.dataset.staffIndex, 10);
+        const tIndex = parseInt(select.dataset.timeIndex, 10);
+        const staff = staffList[sIndex];
         const currentVal = select.value;
-        buildSelectOptions(select, currentVal);
+        buildSelectOptions(select, currentVal, staff, tIndex);
       });
     }
 
-    function applyTaskColor(element, taskName) {
+    // ★ セルの色適用ロジック（希望枠黄色の判定付き）
+    function applyTaskColor(element, taskName, staff, tIndex) {
       element.className = "task-select";
       const tIdx = taskList.findIndex(t => t.name === taskName);
 
@@ -510,7 +468,12 @@
       } else if (taskName === "休憩") {
         element.classList.add("task-休憩");
       } else {
-        element.classList.add("task-休");
+        // 未割り当て（"-"）の場合、希望枠内か判定
+        if (staff && isWithinAvailableTime(staff, tIndex)) {
+          element.classList.add("slot-available");
+        } else {
+          element.classList.add("task-休");
+        }
       }
     }
 
@@ -544,16 +507,15 @@
       recalculate();
     }
 
-    // --- 出勤時間順（＋退勤時間順）に並べ替え ---
     function sortStaff() {
       staffList.sort((a, b) => {
         const aWork = getWorkTimeIndices(a);
         const bWork = getWorkTimeIndices(b);
 
         if (aWork.start !== bWork.start) {
-          return aWork.start - bWork.start; // 出勤が早い順
+          return aWork.start - bWork.start;
         }
-        return aWork.end - bWork.end; // 出勤が同じ場合は退勤が早い順
+        return aWork.end - bWork.end;
       });
 
       renderBody();
@@ -573,7 +535,6 @@
         }
       }
 
-      // シフト未割り当ての場合は「希望可能時間」で評価
       if (firstIdx === -1) {
         firstIdx = timeSlots.indexOf(staff.availStart);
         if (firstIdx === -1) firstIdx = 999;
@@ -600,7 +561,6 @@
     function loadDataForDate(dateStr) {
       document.getElementById("displayDateTitle").textContent = `（${dateStr}）`;
 
-      // 時間軸ロード
       const savedTimeSlots = localStorage.getItem(`shift_${dateStr}_timeSlots`);
       if (savedTimeSlots) {
         try { timeSlots = JSON.parse(savedTimeSlots); } catch (e) { initDefaultTimeSlots(); }
@@ -608,7 +568,6 @@
         initDefaultTimeSlots();
       }
 
-      // 業務・必要人数のロード
       const savedTaskList = localStorage.getItem(`shift_${dateStr}_taskList`);
       if (savedTaskList) {
         try { taskList = JSON.parse(savedTaskList); } catch (e) { taskList = []; }
@@ -621,7 +580,6 @@
         ];
       }
 
-      // スタッフのロード
       const savedStaff = localStorage.getItem(`shift_${dateStr}_staffList`);
       if (savedStaff) {
         try { staffList = JSON.parse(savedStaff); } catch (e) { staffList = []; }
@@ -780,7 +738,6 @@
       recalculate();
     }
 
-    // PDF / 印刷用出力
     function exportShift() {
       if (staffList.length === 0) { alert("出力するスタッフデータがありません。"); return; }
 
@@ -846,65 +803,98 @@
       });
       legendHtml += `<div class="legend-item"><div class="legend-color task-休憩"></div> 休憩</div>`;
 
+      const nowStr = new Date().toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+
       const html = `
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>文化祭シフト表_${currentDate}</title>
+  <title>日別シフト表_${currentDate}</title>
   <style>
-    @page { size: A4 landscape; margin: 8mm; }
-    body { font-family: sans-serif; margin: 15px; color: #333; }
-    .no-print-bar { display: flex; justify-content: space-between; align-items: center; background: #eef2f7; padding: 10px 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #d0d7de; }
-    .btn-print { background-color: #007bff; color: white; border: none; padding: 8px 20px; font-size: 1rem; border-radius: 4px; font-weight: bold; cursor: pointer; }
-    .header-title { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #0056b3; padding-bottom: 6px; margin-bottom: 15px; }
-    .header-title h1 { margin: 0; font-size: 1.5rem; }
-    .header-title .date { font-size: 1.2rem; font-weight: bold; color: #0056b3; }
-    .legend-container { display: flex; gap: 15px; margin-bottom: 15px; font-size: 0.85rem; align-items: center; }
-    .legend-item { display: flex; align-items: center; gap: 4px; }
-    .legend-color { width: 14px; height: 14px; border-radius: 3px; border: 1px solid #aaa; }
+    @page { size: A4 landscape; margin: 6mm 8mm; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body { font-family: "Hiragino Kaku Gothic ProN", "Meiryo", Arial, sans-serif; margin: 0; padding: 10px; color: #111; background-color: #fff; }
+    .no-print-bar { display: flex; justify-content: space-between; align-items: center; background: #eef2f7; padding: 10px 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #d0d7de; }
+    .btn-print { background-color: #007bff; color: white; border: none; padding: 8px 20px; font-size: 0.95rem; border-radius: 4px; font-weight: bold; cursor: pointer; }
+    .btn-print:hover { background-color: #0056b3; }
+
+    .header-container { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px double #0056b3; padding-bottom: 4px; margin-bottom: 10px; }
+    .header-title-area { display: flex; align-items: baseline; gap: 15px; }
+    .header-title-area h1 { margin: 0; font-size: 1.6rem; letter-spacing: 1px; }
+    .header-title-area .date { font-size: 1.2rem; font-weight: bold; color: #0056b3; }
+    .header-meta { font-size: 0.75rem; color: #555; text-align: right; }
+
+    .legend-container { display: flex; gap: 15px; margin-bottom: 10px; font-size: 0.8rem; align-items: center; background: #fafafa; padding: 6px 10px; border: 1px solid #eee; border-radius: 4px; }
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .legend-color { width: 14px; height: 14px; border-radius: 2px; border: 1px solid #888; }
+
     table.gantt-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 0.75rem; }
-    table.gantt-table th, table.gantt-table td { border: 1px solid #ccc; text-align: center; height: 36px; padding: 0; box-sizing: border-box; }
-    th.col-name { width: 90px; background: #f0f4f8; font-weight: bold; }
-    th.col-time { width: 105px; background: #f0f4f8; font-weight: bold; color: #0056b3; }
-    th.time-col { background: #f8f9fa; font-size: 0.7rem; }
-    td.col-name { font-weight: bold; background: #fafafa; }
-    td.col-time { font-size: 0.75rem; font-weight: bold; color: #0056b3; background: #fafafa; }
+    table.gantt-table th, table.gantt-table td { border: 1px solid #777; text-align: center; height: 32px; padding: 0; box-sizing: border-box; }
+    
+    th.col-name { width: 100px; background: #eef2f7; font-weight: bold; font-size: 0.8rem; }
+    th.col-time { width: 105px; background: #eef2f7; font-weight: bold; color: #0056b3; font-size: 0.8rem; }
+    th.time-col { background: #f8f9fa; font-size: 0.7rem; font-weight: normal; }
+
+    td.col-name { font-weight: bold; background: #fdfdfd; font-size: 0.85rem; }
+    td.col-time { font-size: 0.75rem; font-weight: bold; color: #0056b3; background: #fdfdfd; }
     td.cell-empty { background-color: #ffffff; }
-    td.cell-task { padding: 2px; }
-    .bar-segment { height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-weight: bold; font-size: 0.8rem; box-sizing: border-box; }
-    .color-bg-0 { background-color: #ffe0b2; color: #e65100; border: 1px solid #ffb74d; }
-    .color-bg-1 { background-color: #bbdefb; color: #0d47a1; border: 1px solid #64b5f6; }
-    .color-bg-2 { background-color: #c8e6c9; color: #1b5e20; border: 1px solid #81c784; }
-    .color-bg-3 { background-color: #e1bee7; color: #4a148c; border: 1px solid #ba68c8; }
-    .color-bg-4 { background-color: #fff9c4; color: #f57f17; border: 1px solid #fff176; }
-    .color-bg-5 { background-color: #b2dfdb; color: #004d40; border: 1px solid #80cbd4; }
-    .color-bg-6 { background-color: #ffccbc; color: #bf360c; border: 1px solid #ffab91; }
-    .color-bg-7 { background-color: #d1c4e9; color: #311b92; border: 1px solid #b39ddb; }
-    .task-休憩 { background-color: #e0e0e0; color: #424242; border: 1px solid #bdbdbd; }
-    @media print { .no-print-bar { display: none !important; } body { margin: 0; } }
+    td.cell-task { padding: 1px 2px; }
+
+    .bar-segment { height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; border-radius: 3px; font-weight: bold; font-size: 0.75rem; box-sizing: border-box; letter-spacing: 0.5px; }
+
+    .color-bg-0 { background-color: #ffe0b2 !important; color: #e65100 !important; border: 1px solid #ffa726; }
+    .color-bg-1 { background-color: #bbdefb !important; color: #0d47a1 !important; border: 1px solid #42a5f5; }
+    .color-bg-2 { background-color: #c8e6c9 !important; color: #1b5e20 !important; border: 1px solid #66bb6a; }
+    .color-bg-3 { background-color: #e1bee7 !important; color: #4a148c !important; border: 1px solid #ab47bc; }
+    .color-bg-4 { background-color: #fff9c4 !important; color: #f57f17 !important; border: 1px solid #ffee58; }
+    .color-bg-5 { background-color: #b2dfdb !important; color: #004d40 !important; border: 1px solid #26a69a; }
+    .color-bg-6 { background-color: #ffccbc !important; color: #bf360c !important; border: 1px solid #ff7043; }
+    .color-bg-7 { background-color: #d1c4e9 !important; color: #311b92 !important; border: 1px solid #7e57c2; }
+    .task-休憩 { background-color: #e0e0e0 !important; color: #333333 !important; border: 1px solid #9e9e9e; }
+
+    @media print { 
+      .no-print-bar { display: none !important; } 
+      body { padding: 0; }
+      tr { page-break-inside: avoid; }
+    }
   </style>
 </head>
 <body>
+
   <div class="no-print-bar">
-    <span>💡 画面右上のボタンからPDF保存・印刷ができます。</span>
+    <span>💡 「🖨️ PDF保存 / 印刷」ボタンをクリックし、送信先を「PDFに保存」に設定してください。</span>
     <button class="btn-print" onclick="window.print()">🖨️ PDF保存 / 印刷</button>
   </div>
-  <div class="header-title">
-    <h1>文化祭シフト表（完成版）</h1>
-    <div class="date">📅 日付: ${currentDate}</div>
+
+  <div class="header-container">
+    <div class="header-title-area">
+      <h1>日別シフト計画表</h1>
+      <div class="date">📅 対象日: ${currentDate}</div>
+    </div>
+    <div class="header-meta">
+      出力日時: ${nowStr}<br>
+      対象人数: ${staffList.length}名
+    </div>
   </div>
-  <div class="legend-container">${legendHtml}</div>
+
+  <div class="legend-container">
+    ${legendHtml}
+  </div>
+
   <table class="gantt-table">
     <thead>
       <tr>
-        <th class="col-name">名前</th>
-        <th class="col-time">シフト時間</th>
+        <th class="col-name">氏名</th>
+        <th class="col-time">勤務時間帯</th>
         ${timeHeaderHtml}
       </tr>
     </thead>
-    <tbody>${staffRowsHtml}</tbody>
+    <tbody>
+      ${staffRowsHtml}
+    </tbody>
   </table>
+
 </body>
 </html>`;
 
@@ -915,4 +905,3 @@
   </script>
 </body>
 </html>
-
