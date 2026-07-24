@@ -52,24 +52,25 @@
     .row-need-task { background-color: #fdfffe; font-size: 0.8rem; }
     .row-summary-total { background-color: #eef2f7; font-weight: bold; }
     .input-need { width: 38px; text-align: center; font-size: 0.8rem; }
-    .minus-value { background-color: #ffcccc; color: #cc0000; font-weight: bold; }
+    .minus-value { background-color: #ffcccc !important; color: #cc0000 !important; font-weight: bold; }
 
-    select.task-select { font-size: 0.8rem; padding: 2px; border: 1px solid #ccc; border-radius: 3px; font-weight: bold; width: 100%; box-sizing: border-box; }
+    select.task-select { font-size: 0.8rem; padding: 2px; border: 1px solid #ccc; border-radius: 3px; font-weight: bold; width: 100%; box-sizing: border-box; background: transparent; }
     
-    /* ★ シフト希望枠（未割り当て時の黄色ハイライト） */
-    .slot-available { background-color: #fffde7 !important; color: #f57f17; border: 1px dashed #fbc02d !important; }
+    /* ★ マス目（td）全体の黄色塗り潰しスタイル */
+    td.slot-available { background-color: #fffde7 !important; }
+    select.slot-available { background-color: #fffde7 !important; color: #f57f17; border: 1px dashed #fbc02d; }
     
     /* タスクカラー定義 */
-    .color-bg-0 { background-color: #ffe0b2 !important; color: #e65100; }
-    .color-bg-1 { background-color: #bbdefb !important; color: #0d47a1; }
-    .color-bg-2 { background-color: #c8e6c9 !important; color: #1b5e20; }
-    .color-bg-3 { background-color: #e1bee7 !important; color: #4a148c; }
-    .color-bg-4 { background-color: #fff9c4 !important; color: #f57f17; }
-    .color-bg-5 { background-color: #b2dfdb !important; color: #004d40; }
-    .color-bg-6 { background-color: #ffccbc !important; color: #bf360c; }
-    .color-bg-7 { background-color: #d1c4e9 !important; color: #311b92; }
-    .task-休憩 { background-color: #e0e0e0 !important; color: #616161; }
-    .task-休 { background-color: #ffffff !important; color: #ccc; }
+    td.color-bg-0, select.color-bg-0 { background-color: #ffe0b2 !important; color: #e65100; }
+    td.color-bg-1, select.color-bg-1 { background-color: #bbdefb !important; color: #0d47a1; }
+    td.color-bg-2, select.color-bg-2 { background-color: #c8e6c9 !important; color: #1b5e20; }
+    td.color-bg-3, select.color-bg-3 { background-color: #e1bee7 !important; color: #4a148c; }
+    td.color-bg-4, select.color-bg-4 { background-color: #fff9c4 !important; color: #f57f17; }
+    td.color-bg-5, select.color-bg-5 { background-color: #b2dfdb !important; color: #004d40; }
+    td.color-bg-6, select.color-bg-6 { background-color: #ffccbc !important; color: #bf360c; }
+    td.color-bg-7, select.color-bg-7 { background-color: #d1c4e9 !important; color: #311b92; }
+    td.task-休憩, select.task-休憩 { background-color: #e0e0e0 !important; color: #616161; }
+    td.task-休, select.task-休 { background-color: #ffffff !important; color: #ccc; }
   </style>
 </head>
 <body>
@@ -285,9 +286,7 @@
         trSum.innerHTML = `<td class="sticky-col1">${stTitle}</td><td class="sticky-col2">-</td>`;
         timeSlots.forEach((_, timeIdx) => {
           const td = document.createElement("td");
-          td.id = `summary-r0-${timeIdx}`;
-          if (rIdx === 1) td.id = `summary-r1-${timeIdx}`;
-          if (rIdx === 2) td.id = `summary-r2-${timeIdx}`;
+          td.id = `summary-r${rIdx}-${timeIdx}`;
           td.textContent = "0";
           trSum.appendChild(td);
         });
@@ -320,7 +319,6 @@
       const container = document.getElementById("legendContainer");
       container.innerHTML = "<strong>【凡例】</strong>";
 
-      // 編集画面用の「希望時間枠」凡例を追加
       const availLegend = document.createElement("div");
       availLegend.className = "legend-item";
       availLegend.innerHTML = `<div class="legend-color slot-available"></div> シフト希望枠（未割り当て）`;
@@ -365,7 +363,6 @@
       return `${startTime}-${endTime}`;
     }
 
-    // ★ シフト希望範囲内かどうか判定する関数
     function isWithinAvailableTime(staff, timeIdx) {
       const sIdx = timeSlots.indexOf(staff.availStart);
       const eIdx = timeSlots.indexOf(staff.availEnd);
@@ -413,12 +410,13 @@
           select.dataset.staffIndex = sIndex;
           select.dataset.timeIndex = tIndex;
 
-          buildSelectOptions(select, staff.schedule[tIndex], staff, tIndex);
+          buildSelectOptions(select, staff.schedule[tIndex]);
+          applyTaskColorToCell(td, select, staff.schedule[tIndex], staff, tIndex);
 
           select.addEventListener("change", (e) => {
             const val = e.target.value;
             staff.schedule[tIndex] = val;
-            applyTaskColor(e.target, val, staff, tIndex);
+            applyTaskColorToCell(td, select, val, staff, tIndex);
             
             document.getElementById(`staff-time-${sIndex}`).textContent = getActualWorkTime(staff.schedule);
             recalculate();
@@ -432,7 +430,7 @@
       });
     }
 
-    function buildSelectOptions(select, currentValue, staff, tIndex) {
+    function buildSelectOptions(select, currentValue) {
       select.innerHTML = "";
       select.appendChild(new Option("-", "-"));
 
@@ -444,7 +442,6 @@
 
       select.appendChild(new Option("休憩", "休憩"));
       select.value = currentValue || "-";
-      applyTaskColor(select, select.value, staff, tIndex);
     }
 
     function updateAllStaffSelectOptions() {
@@ -453,26 +450,35 @@
         const sIndex = parseInt(select.dataset.staffIndex, 10);
         const tIndex = parseInt(select.dataset.timeIndex, 10);
         const staff = staffList[sIndex];
+        const td = select.parentElement;
         const currentVal = select.value;
-        buildSelectOptions(select, currentVal, staff, tIndex);
+
+        buildSelectOptions(select, currentVal);
+        applyTaskColorToCell(td, select, currentVal, staff, tIndex);
       });
     }
 
-    // ★ セルの色適用ロジック（希望枠黄色の判定付き）
-    function applyTaskColor(element, taskName, staff, tIndex) {
-      element.className = "task-select";
+    // ★ マス（td）とプルダウン（select）の両方に色を適用するロジック
+    function applyTaskColorToCell(td, select, taskName, staff, tIndex) {
+      td.className = "";
+      select.className = "task-select";
+
       const tIdx = taskList.findIndex(t => t.name === taskName);
 
       if (tIdx !== -1 && taskName !== "") {
-        element.classList.add(`color-bg-${tIdx % 8}`);
+        const colorClass = `color-bg-${tIdx % 8}`;
+        td.classList.add(colorClass);
+        select.classList.add(colorClass);
       } else if (taskName === "休憩") {
-        element.classList.add("task-休憩");
+        td.classList.add("task-休憩");
+        select.classList.add("task-休憩");
       } else {
-        // 未割り当て（"-"）の場合、希望枠内か判定
         if (staff && isWithinAvailableTime(staff, tIndex)) {
-          element.classList.add("slot-available");
+          td.classList.add("slot-available");
+          select.classList.add("slot-available");
         } else {
-          element.classList.add("task-休");
+          td.classList.add("task-休");
+          select.classList.add("task-休");
         }
       }
     }
@@ -738,6 +744,9 @@
       recalculate();
     }
 
+    /* ==========================================================
+       ★ 完成版ガントチャート (集計行「必要人数」「投入人数」「過不足」追加)
+       ========================================================== */
     function exportShift() {
       if (staffList.length === 0) { alert("出力するスタッフデータがありません。"); return; }
 
@@ -762,6 +771,7 @@
         return blocks;
       }
 
+      // 1. スタッフ行の生成
       let staffRowsHtml = "";
       staffList.forEach(staff => {
         const timeStr = getActualWorkTime(staff.schedule);
@@ -792,6 +802,48 @@
         `;
       });
 
+      // 2. 集計行（「必要人数」「投入人数」「過不足」）の計算と生成
+      let needCellsHtml = "";
+      let inputCellsHtml = "";
+      let diffCellsHtml = "";
+
+      timeSlots.forEach((_, tIdx) => {
+        let totalNeed = 0;
+        taskList.forEach(task => {
+          const val = parseInt(task.needs[tIdx], 10);
+          if (!isNaN(val)) totalNeed += val;
+        });
+
+        let activeCount = 0;
+        staffList.forEach(staff => {
+          const task = staff.schedule[tIdx];
+          if (task && task !== "-" && task !== "休憩") activeCount++;
+        });
+
+        const diffVal = activeCount - totalNeed;
+        const diffStr = diffVal > 0 ? `+${diffVal}` : `${diffVal}`;
+        const diffClass = diffVal < 0 ? "minus-value" : "";
+
+        needCellsHtml += `<td class="summary-cell">${totalNeed}</td>`;
+        inputCellsHtml += `<td class="summary-cell">${activeCount}</td>`;
+        diffCellsHtml += `<td class="summary-cell ${diffClass}">${diffStr}</td>`;
+      });
+
+      const summaryRowsHtml = `
+        <tr class="row-summary">
+          <td class="col-name summary-title" colspan="2">必要人数</td>
+          ${needCellsHtml}
+        </tr>
+        <tr class="row-summary">
+          <td class="col-name summary-title" colspan="2">投入人数</td>
+          ${inputCellsHtml}
+        </tr>
+        <tr class="row-summary">
+          <td class="col-name summary-title" colspan="2">過不足</td>
+          ${diffCellsHtml}
+        </tr>
+      `;
+
       let timeHeaderHtml = "";
       timeSlots.forEach(t => { timeHeaderHtml += `<th class="time-col">${t}</th>`; });
 
@@ -813,7 +865,7 @@
   <title>日別シフト表_${currentDate}</title>
   <style>
     @page { size: A4 landscape; margin: 6mm 8mm; }
-    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box; }
     body { font-family: "Hiragino Kaku Gothic ProN", "Meiryo", Arial, sans-serif; margin: 0; padding: 10px; color: #111; background-color: #fff; }
     .no-print-bar { display: flex; justify-content: space-between; align-items: center; background: #eef2f7; padding: 10px 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #d0d7de; }
     .btn-print { background-color: #007bff; color: white; border: none; padding: 8px 20px; font-size: 0.95rem; border-radius: 4px; font-weight: bold; cursor: pointer; }
@@ -829,8 +881,9 @@
     .legend-item { display: flex; align-items: center; gap: 5px; }
     .legend-color { width: 14px; height: 14px; border-radius: 2px; border: 1px solid #888; }
 
+    /* ガントチャートテーブル（行・列幅均一指定） */
     table.gantt-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 0.75rem; }
-    table.gantt-table th, table.gantt-table td { border: 1px solid #777; text-align: center; height: 32px; padding: 0; box-sizing: border-box; }
+    table.gantt-table th, table.gantt-table td { border: 1px solid #777; text-align: center; height: 30px; padding: 0; }
     
     th.col-name { width: 100px; background: #eef2f7; font-weight: bold; font-size: 0.8rem; }
     th.col-time { width: 105px; background: #eef2f7; font-weight: bold; color: #0056b3; font-size: 0.8rem; }
@@ -841,7 +894,28 @@
     td.cell-empty { background-color: #ffffff; }
     td.cell-task { padding: 1px 2px; }
 
-    .bar-segment { height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; border-radius: 3px; font-weight: bold; font-size: 0.75rem; box-sizing: border-box; letter-spacing: 0.5px; }
+    /* ★ 業務名文字溢れ防止（隠す処理） */
+    .bar-segment { 
+      height: 100%; 
+      width: 100%; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      border-radius: 3px; 
+      font-weight: bold; 
+      font-size: 0.7rem; 
+      letter-spacing: 0.3px;
+      white-space: nowrap; 
+      overflow: hidden; 
+      text-overflow: ellipsis; 
+      padding: 0 2px;
+    }
+
+    /* 集計行スタイル */
+    .row-summary { background-color: #f1f5f9; }
+    .summary-title { font-size: 0.8rem; font-weight: bold; background-color: #e2e8f0; }
+    .summary-cell { font-weight: bold; font-size: 0.75rem; background-color: #f8fafc; }
+    .minus-value { background-color: #ffcccc !important; color: #cc0000 !important; font-weight: bold; }
 
     .color-bg-0 { background-color: #ffe0b2 !important; color: #e65100 !important; border: 1px solid #ffa726; }
     .color-bg-1 { background-color: #bbdefb !important; color: #0d47a1 !important; border: 1px solid #42a5f5; }
@@ -891,6 +965,7 @@
       </tr>
     </thead>
     <tbody>
+      ${summaryRowsHtml}
       ${staffRowsHtml}
     </tbody>
   </table>
